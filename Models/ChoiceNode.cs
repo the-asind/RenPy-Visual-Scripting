@@ -7,7 +7,7 @@ namespace RenPy_VisualScripting.Models;
 /// <returns></returns>
 public class ChoiceNode
 {
-    public string LabelName { get; set; }
+    public string LabelName { get; set; } = "ERROR";
     public int StartLine { get; set; }
     public int EndLine { get; set; }
     public List<ChoiceNode> Children { get; set; } = [];
@@ -22,5 +22,5 @@ public enum ChoiceNodeType
     IfBlock,
     ElseBlock,
     MenuBlock,
-    ChoiceBlock
+    MenuOption
 }

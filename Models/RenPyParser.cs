@@ -143,12 +143,7 @@ namespace RenPy_VisualScripting.Models
 
                 if (IsMenuStatement(Line(index).Trim()))
                 {
-                    currentNode.NodeType = ChoiceNodeType.MenuBlock;
-                    currentNode.EndLine = index;
-                    index++;
-                    ParseMenuBlock(ref index, currentIndent + 1, currentNode);
-                    index--;
-                    currentNode.EndLine = index;
+                    ParseMenuBlock(ref index, currentNode, currentIndent);
                     return true;
                 }
 
@@ -185,13 +180,14 @@ namespace RenPy_VisualScripting.Models
                 var temp = (ParseBlock(ref index, currentIndent + 1, statementNode));
                 statementNode.LabelName = GetLabelName(statementNode);
                 currentNode.Children.Add(statementNode);
-                statementNode.StartLine = index;
+                //statementNode.StartLine = index;
                 
                 if (!temp)
                     break;
                 index++;
                 statementNode = new ChoiceNode { StartLine = index, NodeType = ChoiceNodeType.Action };
             }
+            // TODO: fix fantom-block at line 56 on example.rpy
         }
 
         /// <summary>
@@ -200,8 +196,13 @@ namespace RenPy_VisualScripting.Models
         /// <param name="index">The current index in the lines array.</param>
         /// <param name="indentLevel">The expected indentation level.</param>
         /// <param name="menuNode">The menu choice node being parsed.</param>
-        private void ParseMenuBlock(ref int index, int indentLevel, ChoiceNode menuNode)
+        private void ParseMenuBlock(ref int index, ChoiceNode menuNode, int indentLevel)
         {
+            // сперва мы встречаем строку "menu:"
+            menuNode.StartLine = index;
+            menuNode.EndLine = index;
+            menuNode.NodeType = ChoiceNodeType.MenuBlock;
+            index++;
             while (index < lines.Count)
             {
                 var line = lines[index];
@@ -212,18 +213,23 @@ namespace RenPy_VisualScripting.Models
                     index++;
                     continue;
                 }
-
-                if (currentIndent < indentLevel)
+                // если встречаем строку с отступом меньше, то выходим
+                if (currentIndent == indentLevel)
+                {
+                    index--;
                     return;
+                }
+                
+                
+                // если строка с двойным отступом или больше, то выходим из меню
 
                 line = line.Trim();
-
-                if (line.EndsWith(":"))
+                // затем мы должны предположить отступ +1 и найти все варианты выбора
+                if (line.StartsWith('\"') && line.EndsWith(':'))
                 {
-                    var choiceText = line.TrimEnd(':').Trim();
                     var choiceNode = new ChoiceNode
-                        { LabelName = choiceText, StartLine = index, NodeType = ChoiceNodeType.ChoiceBlock };
-                    index++;
+                        { LabelName = line.TrimEnd(':').Trim(), StartLine = index, 
+                            NodeType = ChoiceNodeType.MenuOption };
                     ParseStatement(ref index, choiceNode, currentIndent, ChoiceNodeType.Action);
                     menuNode.Children.Add(choiceNode);
                 }
@@ -342,8 +348,8 @@ namespace RenPy_VisualScripting.Models
         private string GetLabelName(ChoiceNode node)
         {
             // if in first line there was a ":" at end of line
-            if (lines[node.StartLine].EndsWith(":"))
-                return lines[node.StartLine].Substring(0, lines[node.StartLine].Length - 1).Trim();
+            if (IsAStatement(lines[node.StartLine]) && lines[node.StartLine].EndsWith(':'))
+                return lines[node.StartLine][..(lines[node.StartLine].Length - 1)].Trim();
             var label = new StringBuilder();
             for (var i = node.StartLine; i <= node.EndLine; i++)
             {
