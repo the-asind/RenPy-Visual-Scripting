@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RenPy_VisualScripting"
+        xmlns:views="clr-namespace:RenPy_VisualScripting.Views"
         mc:Ignorable="d"
         Title="RenPy Visual Scripting" Height="450" Width="800">
     <DockPanel>
@@ -16,8 +17,21 @@
             <MenuItem Header="Справка">
             </MenuItem>
         </Menu>
-        <TabControl x:Name="LabelTabControl">
-            <!-- Tabs will be added programmatically -->
+        <TabControl ItemsSource="{Binding RootNodes}">
+            <!-- Tabs representing LabelBlocks -->
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding LabelName}"/>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <!-- Display node tree starting from LabelBlock -->
+                    <ScrollViewer>
+                        <views:NodeControl DataContext="{Binding}"/>
+                    </ScrollViewer>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
         </TabControl>
     </DockPanel>
 </Window>

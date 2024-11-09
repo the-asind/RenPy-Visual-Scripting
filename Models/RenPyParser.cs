@@ -81,7 +81,7 @@ namespace RenPy_VisualScripting.Models
                 }
             }
 
-            return rootNode; //TODO: fix it
+            return rootNode;
         }
 
         /// <summary>

@@ -2,8 +2,12 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:RenPy_VisualScripting"
+             xmlns:views="clr-namespace:RenPy_VisualScripting.Views"
+             xmlns:viewModels="clr-namespace:RenPy_VisualScripting.ViewModels"
              StartupUri="Views/MainView.xaml">
     <Application.Resources>
-         
+        <DataTemplate x:Key="NodeControlTemplate" DataType="{x:Type viewModels:ChoiceNodeViewModel}">
+            <views:NodeControl/>
+        </DataTemplate>
     </Application.Resources>
 </Application>

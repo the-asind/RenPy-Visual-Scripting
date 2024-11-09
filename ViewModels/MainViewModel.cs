@@ -4,6 +4,9 @@ using System.Windows.Input;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 using RenPy_VisualScripting.Models;
+using System.Collections.ObjectModel;
+using System.Linq;
+using RenPy_VisualScripting.Commands;
 
 namespace RenPy_VisualScripting.ViewModels;
 
@@ -13,16 +16,18 @@ public class MainViewModel : INotifyPropertyChanged
 
     public ICommand OpenFileCommand { get; }
 
-    private ChoiceNode _choiceTree;
-    public ChoiceNode ChoiceTree
+    private ChoiceNodeViewModel _choiceTreeViewModel;
+    public ChoiceNodeViewModel ChoiceTreeViewModel
     {
-        get => _choiceTree;
+        get => _choiceTreeViewModel;
         set
         {
-            _choiceTree = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ChoiceTree)));
+            _choiceTreeViewModel = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ChoiceTreeViewModel)));
         }
     }
+
+    public ObservableCollection<ChoiceNodeViewModel> RootNodes { get; set; } = new();
 
     public string FilePath { get; private set; }
 
@@ -30,7 +35,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     public MainViewModel()
     {
-        OpenFileCommand = new RelayCommand(async () => await LoadChoiceTreeAsync());
+        OpenFileCommand = new RelayCommand(async () => await LoadChoiceTreeAsync(), () => true);
     }
 
     private async Task LoadChoiceTreeAsync()
@@ -43,8 +48,18 @@ public class MainViewModel : INotifyPropertyChanged
         {
             FilePath = openFileDialog.FileName;
             var parser = new RenPyParser();
-            ChoiceTree = await parser.ParseAsync(FilePath);
+            var choiceTree = await parser.ParseAsync(FilePath);
+            ChoiceTreeViewModel = new ChoiceNodeViewModel(choiceTree);
+
+            // Extract LabelBlocks for tabs
+            RootNodes.Clear();
+            foreach (var node in ChoiceTreeViewModel.Children.Where(n => n.NodeType == ChoiceNodeType.LabelBlock))
+            {
+                RootNodes.Add(node);
+            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RootNodes)));
             FileOpened?.Invoke(this, FilePath);
         }
     }
 }
+
