@@ -11,16 +11,16 @@ public class ChoiceNode
     public int StartLine { get; set; }
     public int EndLine { get; set; }
     public List<ChoiceNode> Children { get; set; } = [];
-    public List<string> Actions { get; set; } = [];
     public ChoiceNodeType NodeType { get; set; }
+    public ChoiceNode? FalseBranch { get; set; }  // Hook for the false branch of an if block
 }
 
 public enum ChoiceNodeType
 {
-    Action,
-    LabelBlock,
-    IfBlock,
-    ElseBlock,
-    MenuBlock,
-    MenuOption
+    Action, // default block type
+    LabelBlock, // block that contains a label
+    IfBlock, // block that contains an if statement and have two outputs (true and false)
+    ElseBlock, // block that contains an else statement (false output of an if block)
+    MenuBlock, // block that contains a menu statement and have multiple outputs
+    MenuOption // option of a menu block
 }

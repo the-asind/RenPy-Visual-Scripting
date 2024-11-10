@@ -4,10 +4,12 @@
              xmlns:local="clr-namespace:RenPy_VisualScripting"
              xmlns:views="clr-namespace:RenPy_VisualScripting.Views"
              xmlns:viewModels="clr-namespace:RenPy_VisualScripting.ViewModels"
+             xmlns:converters="clr-namespace:RenPy_VisualScripting.Converters"
              StartupUri="Views/MainView.xaml">
     <Application.Resources>
         <DataTemplate x:Key="NodeControlTemplate" DataType="{x:Type viewModels:ChoiceNodeViewModel}">
             <views:NodeControl/>
         </DataTemplate>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
     </Application.Resources>
 </Application>
